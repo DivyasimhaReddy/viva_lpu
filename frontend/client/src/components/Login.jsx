@@ -1,106 +1,140 @@
-// import { useState } from "react";
-// import axios from "axios";
-// import { useNavigate } from "react-router-dom";
-
-// function Login() {
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const navigate = useNavigate();
-
-//   const login = async () => {
-//     const res = await axios.post("http://localhost:3001/api/auth/login", {
-//       email,
-//       password,
-//     });
-//     if (res.data.token) {
-//       localStorage.setItem("token", res.data.token);
-//       navigate("/");
-//     } else {
-//       alert(res.data.message);
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h2>Login</h2>
-//       <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-//       <input
-//         placeholder="Password"
-//         type="password"
-//         onChange={(e) => setPassword(e.target.value)}
-//       />
-//       <button onClick={login}>Login</button>
-//     </div>
-//   );
-// }
-
-// export default Login;
 import React, { useState } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../utils/axiosInstance";
 
-const Login = () => {
+const Auth = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Please fill in all fields.");
+      return;
+    }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
     try {
-      const response = await axiosInstance.post("/auth/login", formData);
-      const { token } = response.data;
-      localStorage.setItem("token", token);
+      const res = await axios.post("http://localhost:3001/api/auth/login", {
+        email,
+        password,
+      });
+
+      localStorage.setItem("token", res.data.token);
+      alert("Login successful!");
       navigate("/todo");
     } catch (err) {
-      setError(err?.response?.data?.message || "Login failed");
+      alert("❌ Error: " + (err.response?.data?.message || err.message));
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-6">Login</h2>
-        {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #89f7fe, #66a6ff)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontFamily: "'Segoe UI', sans-serif",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "#fff",
+          padding: "40px",
+          borderRadius: "16px",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.1)",
+          maxWidth: "400px",
+          width: "100%",
+        }}
+      >
+        <h2
+          style={{
+            textAlign: "center",
+            marginBottom: "28px",
+            color: "#2c3e50",
+            fontSize: "28px",
+            fontWeight: "700",
+          }}
+        >
+          🔐 Login
+        </h2>
+
+        <div style={{ marginBottom: "20px" }}>
+          <label
+            style={{
+              display: "block",
+              marginBottom: "6px",
+              fontSize: "14px",
+              color: "#34495e",
+            }}
+          >
+            Email
+          </label>
           <input
             type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
+            placeholder="Enter email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+              fontSize: "15px",
+              outline: "none",
+            }}
           />
+        </div>
+
+        <div style={{ marginBottom: "25px" }}>
+          <label
+            style={{
+              display: "block",
+              marginBottom: "6px",
+              fontSize: "14px",
+              color: "#34495e",
+            }}
+          >
+            Password
+          </label>
           <input
             type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+              fontSize: "15px",
+              outline: "none",
+            }}
           />
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-          >
-            Login
-          </button>
-        </form>
+        </div>
+
+        <button
+          onClick={handleLogin}
+          style={{
+            width: "100%",
+            backgroundColor: "#3498db",
+            color: "#fff",
+            padding: "12px",
+            fontSize: "16px",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: "600",
+            transition: "0.3s",
+          }}
+        >
+          Login
+        </button>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default Auth;
