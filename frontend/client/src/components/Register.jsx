@@ -1,132 +1,169 @@
-// import { useState } from "react";
-// import axios from "axios";
-// import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-// function Register() {
-//   const [username, setUsername] = useState("");
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const navigate = useNavigate();
-
-//   const register = async () => {
-//     try {
-//       const res = await axios.post("http://localhost:3001/api/auth/register", {
-//         username,
-//         email,
-//         password,
-//       });
-//       alert(res.data.message);
-//       navigate("/login");
-//     } catch (error) {
-//       alert(error.response?.data?.message || "Registration failed");
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h2>Register</h2>
-//       <input
-//         placeholder="Username"
-//         onChange={(e) => setUsername(e.target.value)}
-//       />
-//       <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-//       <input
-//         placeholder="Password"
-//         type="password"
-//         onChange={(e) => setPassword(e.target.value)}
-//       />
-//       <button onClick={register}>Register</button>
-//     </div>
-//   );
-// }
-
-// export default Register;
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; // <-- Make sure 'Link' is imported here
-import axiosInstance from "../utils/axiosInstance";
-
-const Register = () => {
+function Auth() {
+  const [isRegister, setIsRegister] = useState(true); // toggle state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  const handleSubmit = async () => {
+    if (!email || !password) {
+      alert("Please fill in all fields.");
+      return;
+    }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
     try {
-      await axiosInstance.post("/auth/register", formData);
-      navigate("/login");
+      const endpoint = isRegister
+        ? "http://localhost:3001/api/auth/register"
+        : "http://localhost:3001/api/auth/login";
+
+      const res = await axios.post(endpoint, { email, password });
+
+      if (!isRegister) {
+        // login success
+        localStorage.setItem("token", res.data.token);
+        alert("Login successful!");
+        navigate("/todo");
+      } else {
+        alert("Registration successful! You can now login.");
+        setIsRegister(false); // switch to login
+      }
     } catch (err) {
-      setError(err?.response?.data?.message || "Registration failed");
+      alert("❌ Error: " + (err.response?.data?.message || err.message));
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-6">Register</h2>
-        {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
-          />
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #89f7fe, #66a6ff)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontFamily: "Segoe UI, sans-serif",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "#fff",
+          padding: "40px",
+          borderRadius: "12px",
+          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
+          maxWidth: "400px",
+          width: "100%",
+        }}
+      >
+        <h2
+          style={{
+            textAlign: "center",
+            marginBottom: "30px",
+            color: "#2c3e50",
+            fontWeight: "bold",
+          }}
+        >
+          {isRegister ? "📝 Register" : "🔐 Login"}
+        </h2>
+
+        <div style={{ marginBottom: "20px" }}>
+          <label
+            style={{
+              display: "block",
+              marginBottom: "8px",
+              fontSize: "14px",
+              color: "#34495e",
+            }}
+          >
+            Email
+          </label>
           <input
             type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
+            placeholder="Enter email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+              fontSize: "15px",
+              outline: "none",
+            }}
           />
+        </div>
+
+        <div style={{ marginBottom: "25px" }}>
+          <label
+            style={{
+              display: "block",
+              marginBottom: "8px",
+              fontSize: "14px",
+              color: "#34495e",
+            }}
+          >
+            Password
+          </label>
           <input
             type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+              fontSize: "15px",
+              outline: "none",
+            }}
           />
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-          >
-            Register
-          </button>
-        </form>
+        </div>
 
-        {/* This is the added redirection link */}
-        <p className="text-center text-gray-600 text-sm mt-6">
-          Already have an account?{" "}
-          <Link
-            to="/login"
-            className="text-blue-600 font-semibold hover:underline"
+        <button
+          onClick={handleSubmit}
+          style={{
+            width: "100%",
+            backgroundColor: isRegister ? "#2ecc71" : "#0984e3",
+            color: "#fff",
+            padding: "12px",
+            fontSize: "16px",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            transition: "0.3s",
+          }}
+        >
+          {isRegister ? "Register" : "Login"}
+        </button>
+
+        <p
+          style={{
+            marginTop: "20px",
+            fontSize: "14px",
+            textAlign: "center",
+            color: "#555",
+          }}
+        >
+          {isRegister ? "Already registered?" : "New here?"}{" "}
+          <span
+            onClick={() => setIsRegister(!isRegister)}
+            style={{
+              color: "#3498db",
+              textDecoration: "underline",
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
           >
-            Login here
-          </Link>
+            {isRegister ? "Login now" : "Register here"}
+          </span>
         </p>
-        {/* End of added redirection link */}
       </div>
     </div>
   );
-};
+}
 
-export default Register;
+export default Auth;
